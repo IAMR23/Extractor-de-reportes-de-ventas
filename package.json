@@ -1,0 +1,22 @@
+{
+  "name": "facturacion-agent",
+  "version": "1.0.0",
+  "description": "Agente Playwright para descargar reportes PDF de facturacion por usuario.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "install:browsers": "npx playwright install chromium"
+  },
+  "keywords": [
+    "playwright",
+    "pdf",
+    "reportes",
+    "automatizacion"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "playwright": "^1.49.1"
+  }
+}
