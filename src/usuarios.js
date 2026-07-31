@@ -1,3 +1,10 @@
+const sucursales = {
+  1: 'NUEVA AURORA',
+  2: 'CAUPICHO',
+  3: 'SANGOLQUI',
+  4: 'CHILLOGALLO'
+};
+
 function getUsuario(index) {
   const name = process.env[`USER${index}_NAME`];
   const username = process.env[`USER${index}_USERNAME`];
@@ -9,7 +16,12 @@ function getUsuario(index) {
     throw new Error(`Credenciales incompletas para USER${index} en .env`);
   }
 
-  return { name, username, password };
+  return {
+    name,
+    username,
+    password,
+    sucursal: sucursales[index]
+  };
 }
 
 const usuarios = [1, 2, 3, 4].map(getUsuario).filter(Boolean);

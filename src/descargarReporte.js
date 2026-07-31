@@ -12,28 +12,44 @@ class ReporteError extends Error {
   }
 }
 
-function sanitizeFileName(value) {
-  return String(value)
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9._-]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .toLowerCase();
-}
+const MESES = [
+  'ENERO',
+  'FEBRERO',
+  'MARZO',
+  'ABRIL',
+  'MAYO',
+  'JUNIO',
+  'JULIO',
+  'AGOSTO',
+  'SEPTIEMBRE',
+  'OCTUBRE',
+  'NOVIEMBRE',
+  'DICIEMBRE'
+];
 
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
 
-function buildPdfPath(usuario, fechaInicio, fechaFin) {
+function buildPdfFileName(usuario, fechaInicio) {
+  const [, month, day] = fechaInicio.split('-').map(Number);
+  const monthName = MESES[month - 1];
+
+  if (!usuario.sucursal) {
+    throw new Error(`No se configuró una sucursal para ${usuario.name}.`);
+  }
+
+  if (!monthName || !Number.isInteger(day)) {
+    throw new Error(`No se pudo obtener el día y el mes de la fecha ${fechaInicio}.`);
+  }
+
+  return `VENTAS UPHONE ${day} ${monthName} ${usuario.sucursal}.pdf`;
+}
+
+function buildPdfPath(usuario, fechaInicio) {
   const fechaCarpeta = fechaInicio;
   const dir = path.join(config.reportesDir, fechaCarpeta);
-  const fileName = [
-    sanitizeFileName(usuario.name),
-    sanitizeFileName(config.nombreReporte),
-    fechaInicio,
-    fechaFin
-  ].join('_') + '.pdf';
+  const fileName = buildPdfFileName(usuario, fechaInicio);
 
   ensureDir(dir);
   return path.join(dir, fileName);
@@ -409,7 +425,7 @@ async function descargarReporte(browser, usuario, fechaInicio, fechaFin) {
     const reportesFrame = await irAModuloReportes(page);
     await seleccionarFechas(reportesFrame, fechaInicio, fechaFin);
 
-    const destinoPdf = buildPdfPath(usuario, fechaInicio, fechaFin);
+    const destinoPdf = buildPdfPath(usuario, fechaInicio);
     let metodo = null;
     let pdfUrl = null;
 
@@ -481,5 +497,6 @@ async function descargarReporte(browser, usuario, fechaInicio, fechaFin) {
 
 module.exports = {
   descargarReporte,
-  ReporteError
+  ReporteError,
+  buildPdfFileName
 };
